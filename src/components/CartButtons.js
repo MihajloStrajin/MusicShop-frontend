@@ -1,14 +1,65 @@
-import React from 'react'
-import { FaShoppingCart, FaUserMinus, FaUserPlus } from 'react-icons/fa'
-import { Link } from 'react-router-dom'
-import styled from 'styled-components'
-import { useProductsContext } from '../context/products_context'
-import { useCartContext } from '../context/cart_context'
-import { useUserContext } from '../context/user_context'
+import React from "react";
+import {
+  FaShoppingCart,
+  FaUserMinus,
+  FaUserPlus,
+  FaPlus,
+  FaEye,
+} from "react-icons/fa";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
+import { useProductsContext } from "../context/products_context";
+import { useCartContext } from "../context/cart_context";
+import { useUserContext } from "../context/user_context";
+import { UseAuthContext } from "../context/auth_context";
+import jwt from "jwt-decode";
 
 const CartButtons = () => {
-  return <h4>cart buttons </h4>
-}
+  const { closeSidebar } = useProductsContext();
+  const { totalItems } = useCartContext();
+
+  const { token, removeToken } = UseAuthContext();
+
+  const logout = () => {
+    removeToken();
+  };
+
+  if (token) {
+    var jwtToken = jwt(token);
+  }
+
+  return (
+    <Wrapper className="cart-btn-wrapper">
+      {token && jwtToken.role === "ADMIN" && (
+        <Link to="/newProduct" className="auth-btn">
+          <FaPlus />
+        </Link>
+      )}
+      {token && jwtToken.role === "ADMIN" ? (
+        <Link to="/invoices" className="auth-btn">
+          <FaEye />
+        </Link>
+      ) : (
+        <Link to="/cart" className="cart-btn" onClick={closeSidebar}>
+          Cart
+          <span className="cart-container">
+            <FaShoppingCart />
+            <span className="cart-value">{totalItems}</span>
+          </span>
+        </Link>
+      )}
+      {!token ? (
+        <Link to="/login" className="auth-btn">
+          Login <FaUserPlus />
+        </Link>
+      ) : (
+        <Link to="/" onClick={logout} className="auth-btn">
+          Logout <FaUserMinus />
+        </Link>
+      )}
+    </Wrapper>
+  );
+};
 
 const Wrapper = styled.div`
   display: grid;
@@ -62,5 +113,5 @@ const Wrapper = styled.div`
       margin-left: 5px;
     }
   }
-`
-export default CartButtons
+`;
+export default CartButtons;
